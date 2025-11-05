@@ -1,0 +1,138 @@
+╔═══════════════════════════════════════════════════════════╗
+║                                                           ║
+║   🏥  PROFEMA QUESTIONNAIRE - QUICK INSTALL               ║
+║                                                           ║
+╚═══════════════════════════════════════════════════════════╝
+
+📦 Profema Questionnaire v1.0.0
+Fullstack aplikace s DUAL WRITE mechanismem
+Listopad 2025
+
+═══════════════════════════════════════════════════════════
+
+🚀 RYCHLÝ START
+
+1️⃣  Vytvoř databáze (port 5433!):
+   psql -U postgres -p 5433
+   CREATE DATABASE profema;
+   CREATE DATABASE astraia;
+   CREATE USER profema_app_user WITH PASSWORD 'profema_secure_2025';
+   GRANT ALL PRIVILEGES ON DATABASE profema TO profema_app_user;
+   GRANT ALL PRIVILEGES ON DATABASE astraia TO profema_app_user;
+
+2️⃣  Spusť projekt:
+   cd /home/tomas/projects/profema-questionnaire
+   ./start-all.sh
+
+3️⃣  Vytvoř admin uživatele:
+   curl -X POST http://localhost:5001/api/auth/register \
+     -H "Content-Type: application/json" \
+     -d '{
+       "email": "admin@profema.cz",
+       "password": "Profema2025!",
+       "first_name": "Admin",
+       "last_name": "Profema",
+       "role": "admin"
+     }'
+
+4️⃣  Otevři prohlížeč:
+   http://localhost:5002
+
+═══════════════════════════════════════════════════════════
+
+🌐 APLIKACE
+
+Backend:  http://localhost:5001/api
+Frontend: http://localhost:5002
+
+═══════════════════════════════════════════════════════════
+
+📚 DOKUMENTACE
+
+README.md         - Quick start guide
+SETUP.md          - Detailní setup a troubleshooting
+FINAL_SUMMARY.md  - Kompletní technický přehled
+
+═══════════════════════════════════════════════════════════
+
+✅ VYTVOŘENÉ SOUBORY
+
+Backend:  29 souborů (NestJS 10.4.8)
+Frontend: 14 souborů (Next.js 15)
+Config:   6 souborů
+Docs:     3 soubory
+CELKEM:   52 souborů (~4,300 řádků kódu)
+
+═══════════════════════════════════════════════════════════
+
+🔑 KLÍČOVÉ FUNKCE
+
+✅ DUAL WRITE - Transakční zápis do 2 DB
+✅ Multi-step form - 5 kroků s validací
+✅ JWT Auth - Bezpečné přihlášení
+✅ TypeScript - Full type safety
+✅ React 19 - Nejnovější React
+✅ Ant Design 5.22 - Moderní UI
+
+═══════════════════════════════════════════════════════════
+
+📊 STACK
+
+Backend:
+- NestJS 10.4.8
+- TypeORM 0.3.20
+- TimescaleDB (port 5433)
+- JWT + Passport
+
+Frontend:
+- Next.js 15 (App Router)
+- React 19
+- Ant Design 5.22
+- TanStack Query v5
+- Zod + React Hook Form
+
+═══════════════════════════════════════════════════════════
+
+💻 MANUÁLNÍ START
+
+Pokud nechceš použít start-all.sh:
+
+Terminal 1 - Backend:
+cd backend
+npm install
+npm run start:dev
+
+Terminal 2 - Frontend:
+cd frontend
+npm install
+npm run dev
+
+═══════════════════════════════════════════════════════════
+
+🐛 TROUBLESHOOTING
+
+Database connection failed:
+→ Zkontroluj: sudo systemctl status postgresql
+→ Port: 5433 (ne 5432!)
+→ Socket: /var/run/postgresql
+
+Module not found:
+→ Smaž node_modules a reinstaluj: rm -rf node_modules && npm install
+
+CORS error:
+→ Zkontroluj CORS_ORIGIN v backend/.env
+
+═══════════════════════════════════════════════════════════
+
+📞 KONTAKT
+
+Klient:    MUDr. Veronika Frisová
+Developer: TK Servis Technology
+Email:     admin@profema.cz
+Status:    READY TO RUN ✅
+
+═══════════════════════════════════════════════════════════
+
+© 2025 TK Servis Technology
+Version 1.0.0 - November 2025
+
