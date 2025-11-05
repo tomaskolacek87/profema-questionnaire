@@ -4,9 +4,9 @@
   "description": "Profema Questionnaire Frontend - Nov 2025",
   "private": true,
   "scripts": {
-    "dev": "next dev -p 5002",
+    "dev": "next dev -p 7302",
     "build": "next build",
-    "start": "next start -p 5002",
+    "start": "next start -p 7302",
     "lint": "next lint",
     "type-check": "tsc --noEmit"
   },
