@@ -11,7 +11,7 @@ export const getProfemaDbConfig = (
   password: configService.get('PROFEMA_DB_PASSWORD'),
   database: configService.get('PROFEMA_DB_NAME'),
   entities: [__dirname + '/../entities/profema/*.entity{.ts,.js}'],
-  synchronize: configService.get('NODE_ENV') === 'development',
+  synchronize: false, // NEVER use synchronize in production - use migrations!
   logging: configService.get('NODE_ENV') === 'development',
   ssl: false,
   extra: {

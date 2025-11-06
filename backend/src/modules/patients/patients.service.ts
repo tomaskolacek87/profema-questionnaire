@@ -34,19 +34,14 @@ export class PatientsService {
         `Starting DUAL WRITE for patient: ${createPatientDto.first_name} ${createPatientDto.last_name}`,
       );
 
-      // STEP 1: Write to Astraia DB (read-only legacy system)
+      // STEP 1: Write to Astraia DB using ORIGINAL Astraia column names
       const astraiaPatient = this.astraiaPatientRepo.create({
-        first_name: createPatientDto.first_name,
-        last_name: createPatientDto.last_name,
-        birth_date: createPatientDto.birth_date,
-        birth_number: createPatientDto.birth_number,
-        insurance_number: createPatientDto.insurance_number,
-        insurance_company: createPatientDto.insurance_company,
-        phone: createPatientDto.phone,
-        email: createPatientDto.email,
-        address: createPatientDto.address,
-        city: createPatientDto.city,
-        postal_code: createPatientDto.postal_code,
+        name: createPatientDto.last_name,           // Astraia uses 'name' for last name
+        other_names: createPatientDto.first_name,   // Astraia uses 'other_names' for first name
+        dob: createPatientDto.birth_date,           // Astraia uses 'dob' for birth date
+        hospital_number: createPatientDto.birth_number, // Astraia uses 'hospital_number'
+        ohip: createPatientDto.insurance_number,    // Astraia uses 'ohip' for insurance
+        site: 1,                                    // REQUIRED by Astraia (default site)
       });
 
       const savedAstraiaPatient = await this.astraiaPatientRepo.save(astraiaPatient);
@@ -99,7 +94,7 @@ export class PatientsService {
   async findAllFromAstraia(): Promise<AstraiaPatient[]> {
     this.logger.log('Loading patients from Astraia database...');
     const patients = await this.astraiaPatientRepo.find({
-      order: { created_at: 'DESC' },
+      order: { last_visit: 'DESC' }, // Astraia uses 'last_visit' not 'created_at'
     });
     this.logger.log(`Loaded ${patients.length} patients from Astraia`);
     return patients;

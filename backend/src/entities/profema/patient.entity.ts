@@ -30,6 +30,9 @@ export class Patient {
   @Column({ nullable: true })
   title: string;
 
+  @Column({ type: 'date', nullable: true })
+  birth_date: Date;
+
   @Column({ nullable: true })
   birth_number: string; // Rodné číslo
 
@@ -80,6 +83,14 @@ export class Patient {
 
   @Column({ nullable: true })
   created_by: string;
+
+  // Assigned doctor (relation to User)
+  @Column({ type: 'uuid', nullable: true })
+  assigned_doctor_id: string;
+
+  @ManyToOne(() => User, { nullable: true })
+  @JoinColumn({ name: 'assigned_doctor_id' })
+  assigned_doctor: User;
 
   @CreateDateColumn()
   created_at: Date;

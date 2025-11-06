@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Card, Table, Button, Input, Space, Typography, Tag, Spin, Empty, Tooltip, Layout, Avatar, Badge, Modal, Form, Row, Col, Select, Checkbox
+  Card, Table, Button, Input, Space, Typography, Tag, Spin, Empty, Tooltip, Layout, Avatar, Badge, Modal, Form, Row, Col, Select, Checkbox, DatePicker
 } from 'antd';
 import {
   PlusOutlined,
@@ -32,6 +32,8 @@ export default function PatientsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [user, setUser] = useState<any>(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editingPatient, setEditingPatient] = useState<any>(null);
   const [form] = Form.useForm();
 
   useEffect(() => {
@@ -65,21 +67,80 @@ export default function PatientsPage() {
 
   const handleCreatePatient = async (values: any) => {
     try {
-      await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/patients`,
-        values,
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+      if (isEditMode && editingPatient) {
+        // Update existing patient
+        await axios.put(
+          `${process.env.NEXT_PUBLIC_API_URL}/patients/${editingPatient.id}`,
+          values,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+            }
           }
-        }
-      );
+        );
+      } else {
+        // Create new patient
+        await axios.post(
+          `${process.env.NEXT_PUBLIC_API_URL}/patients`,
+          values,
+          {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+            }
+          }
+        );
+      }
       setIsModalVisible(false);
+      setIsEditMode(false);
+      setEditingPatient(null);
       form.resetFields();
       refetch();
     } catch (error) {
-      console.error('Error creating patient:', error);
+      console.error('Error saving patient:', error);
     }
+  };
+
+  const handleEditPatient = (patient: any) => {
+    setEditingPatient(patient);
+    setIsEditMode(true);
+    form.setFieldsValue({
+      first_name: patient.other_names || patient.first_name,
+      last_name: patient.name || patient.last_name,
+      birth_number: patient.hospital_number || patient.birth_number,
+      phone: patient.phone,
+      email: patient.email,
+      address: patient.address,
+      city: patient.city,
+      postal_code: patient.postal_code,
+      insurance_company: patient.insurance_company,
+      gdpr_consent: patient.gdpr_consent,
+    });
+    setIsModalVisible(true);
+  };
+
+  const handleDeletePatient = async (patientId: string) => {
+    Modal.confirm({
+      title: 'Smazat pacientku?',
+      content: 'Opravdu chcete smazat tuto pacientku? Tato akce je nevratná.',
+      okText: 'Smazat',
+      cancelText: 'Zrušit',
+      okButtonProps: { danger: true },
+      onOk: async () => {
+        try {
+          await axios.delete(
+            `${process.env.NEXT_PUBLIC_API_URL}/patients/${patientId}`,
+            {
+              headers: {
+                Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+              }
+            }
+          );
+          refetch();
+        } catch (error) {
+          console.error('Error deleting patient:', error);
+        }
+      },
+    });
   };
 
   const columns = [
@@ -160,11 +221,19 @@ export default function PatientsPage() {
               Dotazník
             </Button>
           </Tooltip>
-          <Tooltip title="Zobrazit detail">
+          <Tooltip title="Upravit">
             <Button
-              icon={<EyeOutlined />}
+              icon={<EditOutlined />}
               size="small"
-              onClick={() => router.push(`/dashboard/patients/${record.id}`)}
+              onClick={() => handleEditPatient(record)}
+            />
+          </Tooltip>
+          <Tooltip title="Smazat">
+            <Button
+              icon={<DeleteOutlined />}
+              size="small"
+              danger
+              onClick={() => handleDeletePatient(record.id)}
             />
           </Tooltip>
         </Space>
@@ -432,11 +501,16 @@ export default function PatientsPage() {
         </Content>
       </Layout>
 
-      {/* Create Patient Modal */}
+      {/* Create/Edit Patient Modal */}
       <Modal
-        title="Nová pacientka"
+        title={isEditMode ? "Upravit pacientku" : "Nová pacientka"}
         open={isModalVisible}
-        onCancel={() => setIsModalVisible(false)}
+        onCancel={() => {
+          setIsModalVisible(false);
+          setIsEditMode(false);
+          setEditingPatient(null);
+          form.resetFields();
+        }}
         footer={null}
         width={700}
       >
@@ -455,12 +529,17 @@ export default function PatientsPage() {
           </Row>
 
           <Row gutter={16}>
-            <Col span={12}>
+            <Col span={8}>
+              <Form.Item name="birth_date" label="Datum narození">
+                <DatePicker size="large" style={{ width: '100%' }} format="DD.MM.YYYY" placeholder="Vyberte datum" />
+              </Form.Item>
+            </Col>
+            <Col span={8}>
               <Form.Item name="birth_number" label="Rodné číslo">
                 <Input size="large" placeholder="000000/0000" />
               </Form.Item>
             </Col>
-            <Col span={12}>
+            <Col span={8}>
               <Form.Item name="insurance_company" label="Pojišťovna">
                 <Input size="large" />
               </Form.Item>
@@ -504,9 +583,14 @@ export default function PatientsPage() {
           <Form.Item>
             <Space>
               <Button type="primary" htmlType="submit" size="large">
-                Vytvořit
+                {isEditMode ? 'Uložit změny' : 'Vytvořit'}
               </Button>
-              <Button onClick={() => setIsModalVisible(false)} size="large">
+              <Button onClick={() => {
+                setIsModalVisible(false);
+                setIsEditMode(false);
+                setEditingPatient(null);
+                form.resetFields();
+              }} size="large">
                 Zrušit
               </Button>
             </Space>
