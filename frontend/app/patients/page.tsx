@@ -17,7 +17,8 @@ import {
   LogoutOutlined,
   BellOutlined,
   CheckCircleOutlined,
-  SendOutlined
+  SendOutlined,
+  DashboardOutlined
 } from '@ant-design/icons';
 import axios from 'axios';
 import { format } from 'date-fns';
@@ -293,11 +294,11 @@ export default function PatientsPage() {
               e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
             }}
           >
-            <UserOutlined style={{ fontSize: 18 }} />
+            <DashboardOutlined style={{ fontSize: 18 }} />
             <span style={{ fontWeight: 500 }}>Dashboard</span>
           </div>
           <div
-            onClick={() => router.push('/dashboard/patients')}
+            onClick={() => router.push('/patients')}
             style={{
               padding: '16px 24px',
               cursor: 'pointer',
