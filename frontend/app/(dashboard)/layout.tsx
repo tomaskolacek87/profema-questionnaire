@@ -11,6 +11,8 @@ const { Content } = Layout;
 // Page titles mapping
 const pageTitles: Record<string, string> = {
   '/dashboard': 'Dashboard',
+  '/calendar': 'Kalendář',
+  '/doctors': 'Lékaři',
   '/patients': 'Pacientky',
   '/questionnaires': 'Dotazníky',
 };

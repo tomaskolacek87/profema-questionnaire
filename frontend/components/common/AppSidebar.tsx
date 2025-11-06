@@ -2,7 +2,7 @@
 
 import { useRouter, usePathname } from 'next/navigation';
 import { Layout } from 'antd';
-import { DashboardOutlined, UserOutlined, FileTextOutlined } from '@ant-design/icons';
+import { DashboardOutlined, UserOutlined, FileTextOutlined, CalendarOutlined, MedicineBoxOutlined } from '@ant-design/icons';
 
 const { Sider } = Layout;
 
@@ -20,6 +20,16 @@ export default function AppSidebar({ collapsed, onCollapse }: AppSidebarProps) {
       key: '/dashboard',
       icon: <DashboardOutlined style={{ fontSize: 18 }} />,
       label: 'Dashboard',
+    },
+    {
+      key: '/calendar',
+      icon: <CalendarOutlined style={{ fontSize: 18 }} />,
+      label: 'Kalendář',
+    },
+    {
+      key: '/doctors',
+      icon: <MedicineBoxOutlined style={{ fontSize: 18 }} />,
+      label: 'Lékaři',
     },
     {
       key: '/patients',
