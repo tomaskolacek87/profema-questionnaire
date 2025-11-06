@@ -121,7 +121,7 @@ export default function PublicGynecologyForm({ token, initialData, onSuccess }: 
 
   return (
     <div>
-      <Steps current={currentStep} items={steps} style={{ marginBottom: 32 }} />
+      <Steps current={currentStep} items={steps} style={{ marginBottom: 32 }} responsive={false} />
 
       <Form form={form} layout="vertical" onFinish={onFinish}>
         {/* KROK 1: Základní údaje */}

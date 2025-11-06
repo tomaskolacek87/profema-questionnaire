@@ -290,7 +290,7 @@ export default function PatientsPage() {
   );
 
   return (
-    <div style={{ background: '#1a1a2e', minHeight: '100vh', padding: '24px' }}>
+    <>
       <div style={{ maxWidth: 1400, margin: '0 auto' }}>
         {/* Actions and Search */}
         <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 24 }}>
@@ -393,6 +393,7 @@ export default function PatientsPage() {
                     marginTop: 16,
                   }}
                   className="dark-table"
+                  scroll={{ x: 1000 }}
                   onRow={(record) => ({
                     onClick: (e) => {
                       // Ignore clicks on buttons
@@ -708,6 +709,6 @@ export default function PatientsPage() {
           </div>
         </div>
       </Modal>
-    </div>
+    </>
   );
 }

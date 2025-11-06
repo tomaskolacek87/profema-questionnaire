@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { Layout } from 'antd';
 import AppSidebar from '@/components/common/AppSidebar';
@@ -22,6 +22,7 @@ export default function DashboardLayout({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const [collapsed, setCollapsed] = useState(true); // Start collapsed on mobile
 
   // Auth check
   useEffect(() => {
@@ -30,6 +31,22 @@ export default function DashboardLayout({
       router.push('/login');
     }
   }, [router]);
+
+  // Check screen size on mount
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth >= 992) {
+        setCollapsed(false); // Desktop: show sidebar
+      } else {
+        setCollapsed(true); // Mobile: hide sidebar
+      }
+    };
+
+    handleResize(); // Initial check
+    window.addEventListener('resize', handleResize);
+
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Get page title based on current path
   const getPageTitle = () => {
@@ -57,15 +74,35 @@ export default function DashboardLayout({
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <AppSidebar />
+      <AppSidebar collapsed={collapsed} onCollapse={setCollapsed} />
 
-      <Layout style={{ background: '#1a1a2e' }}>
-        <AppHeader title={getPageTitle()} />
+      <Layout style={{ background: '#1a1a2e', marginLeft: collapsed ? 0 : 250, transition: 'margin-left 0.2s' }}>
+        <AppHeader title={getPageTitle()} onMenuClick={() => setCollapsed(!collapsed)} />
 
-        <Content style={{ padding: '24px' }}>
+        <Content style={{ padding: '16px' }} className="dashboard-content">
           {children}
         </Content>
       </Layout>
+
+      <style jsx global>{`
+        @media (min-width: 992px) {
+          .ant-layout {
+            margin-left: 0 !important;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .dashboard-content {
+            padding: 12px !important;
+          }
+        }
+
+        @media (max-width: 576px) {
+          .dashboard-content {
+            padding: 8px !important;
+          }
+        }
+      `}</style>
     </Layout>
   );
 }

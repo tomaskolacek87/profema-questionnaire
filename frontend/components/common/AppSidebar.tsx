@@ -6,7 +6,12 @@ import { DashboardOutlined, UserOutlined, FileTextOutlined } from '@ant-design/i
 
 const { Sider } = Layout;
 
-export default function AppSidebar() {
+interface AppSidebarProps {
+  collapsed: boolean;
+  onCollapse: (collapsed: boolean) => void;
+}
+
+export default function AppSidebar({ collapsed, onCollapse }: AppSidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -29,69 +34,114 @@ export default function AppSidebar() {
   ];
 
   return (
-    <Sider
-      width={250}
-      style={{
-        background: 'linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 100%)',
-        boxShadow: '2px 0 8px rgba(0,0,0,0.3)'
-      }}
-    >
-      {/* Logo */}
-      <div style={{
-        padding: '24px',
-        textAlign: 'center',
-        borderBottom: '1px solid rgba(255,255,255,0.1)'
-      }}>
-        <img
-          src="https://www.profema.cz/wp-content/uploads/2019/12/logo_profema_white_big.png"
-          alt="Profema"
+    <>
+      {/* Mobile overlay */}
+      {!collapsed && (
+        <div
+          onClick={() => onCollapse(true)}
           style={{
-            width: '100%',
-            maxWidth: '180px',
-            height: 'auto'
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            zIndex: 99,
+            display: 'none'
           }}
+          className="mobile-overlay"
         />
-      </div>
+      )}
 
-      {/* Menu Items */}
-      <div style={{ marginTop: 16 }}>
-        {menuItems.map((item) => {
-          const isActive = pathname === item.key;
+      <Sider
+        width={250}
+        collapsedWidth={0}
+        collapsed={collapsed}
+        onCollapse={onCollapse}
+        breakpoint="lg"
+        style={{
+          background: 'linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 100%)',
+          boxShadow: '2px 0 8px rgba(0,0,0,0.3)',
+          overflow: 'auto',
+          height: '100vh',
+          position: 'fixed',
+          left: 0,
+          top: 0,
+          bottom: 0,
+          zIndex: 100,
+        }}
+      >
+        {/* Logo */}
+        <div style={{
+          padding: '24px',
+          textAlign: 'center',
+          borderBottom: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <img
+            src="https://www.profema.cz/wp-content/uploads/2019/12/logo_profema_white_big.png"
+            alt="Profema"
+            style={{
+              width: '100%',
+              maxWidth: '180px',
+              height: 'auto'
+            }}
+          />
+        </div>
 
-          return (
-            <div
-              key={item.key}
-              onClick={() => router.push(item.key)}
-              style={{
-                padding: '16px 24px',
-                cursor: 'pointer',
-                background: isActive ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
-                borderLeft: isActive ? '4px solid #a855f7' : '4px solid transparent',
-                color: isActive ? 'white' : 'rgba(255,255,255,0.7)',
-                display: 'flex',
-                alignItems: 'center',
-                gap: 12,
-                transition: 'all 0.3s'
-              }}
-              onMouseEnter={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-                  e.currentTarget.style.color = 'white';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isActive) {
-                  e.currentTarget.style.background = 'transparent';
-                  e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
-                }
-              }}
-            >
-              {item.icon}
-              <span style={{ fontWeight: 500 }}>{item.label}</span>
-            </div>
-          );
-        })}
-      </div>
-    </Sider>
+        {/* Menu Items */}
+        <div style={{ marginTop: 16 }}>
+          {menuItems.map((item) => {
+            const isActive = pathname === item.key;
+
+            return (
+              <div
+                key={item.key}
+                onClick={() => {
+                  router.push(item.key);
+                  // Auto-close on mobile after navigation
+                  if (window.innerWidth < 992) {
+                    onCollapse(true);
+                  }
+                }}
+                style={{
+                  padding: '16px 24px',
+                  cursor: 'pointer',
+                  background: isActive ? 'rgba(168, 85, 247, 0.2)' : 'transparent',
+                  borderLeft: isActive ? '4px solid #a855f7' : '4px solid transparent',
+                  color: isActive ? 'white' : 'rgba(255,255,255,0.7)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 12,
+                  transition: 'all 0.3s'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
+                    e.currentTarget.style.color = 'white';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isActive) {
+                    e.currentTarget.style.background = 'transparent';
+                    e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
+                  }
+                }}
+              >
+                {item.icon}
+                <span style={{ fontWeight: 500 }}>{item.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </Sider>
+
+      <style jsx global>{`
+        @media (max-width: 992px) {
+          .mobile-overlay {
+            display: block !important;
+          }
+        }
+      `}</style>
+    </>
   );
 }

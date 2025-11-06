@@ -181,8 +181,7 @@ export default function QuestionnairesPage() {
   );
 
   return (
-    <div style={{ background: '#1a1a2e', minHeight: '100vh', padding: '24px' }}>
-      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+    <div style={{ maxWidth: 1400, margin: '0 auto' }}>
 
             {/* VYPLNIT DOTAZNÍK - Hlavní akční sekce */}
             <Card
@@ -428,6 +427,8 @@ export default function QuestionnairesPage() {
               rowKey="id"
               pagination={{ pageSize: 15, showSizeChanger: true }}
               style={{ marginTop: 16 }}
+              className="dark-table"
+              scroll={{ x: 1200 }}
             />
           ) : (
             <Empty
@@ -440,7 +441,78 @@ export default function QuestionnairesPage() {
             />
           )}
         </Card>
-      </div>
+
+      {/* Dark table styling */}
+      <style jsx global>{`
+        .dark-table .ant-table {
+          background: transparent !important;
+          color: #ffffff !important;
+        }
+
+        .dark-table .ant-table-thead > tr > th {
+          background: rgba(45, 27, 78, 0.6) !important;
+          color: rgba(255, 255, 255, 0.9) !important;
+          border-bottom: 1px solid rgba(168, 85, 247, 0.3) !important;
+          font-weight: 600 !important;
+        }
+
+        .dark-table .ant-table-tbody > tr {
+          background: rgba(30, 21, 54, 0.4) !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .dark-table .ant-table-tbody > tr:hover {
+          background: rgba(168, 85, 247, 0.15) !important;
+        }
+
+        .dark-table .ant-table-tbody > tr:hover > td {
+          background: transparent !important;
+          color: #ffffff !important;
+        }
+
+        .dark-table .ant-table-tbody > tr > td {
+          color: #ffffff !important;
+          border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .dark-table .ant-pagination {
+          color: #ffffff !important;
+        }
+
+        .dark-table .ant-pagination-item {
+          background: rgba(45, 27, 78, 0.6) !important;
+          border: 1px solid rgba(168, 85, 247, 0.3) !important;
+        }
+
+        .dark-table .ant-pagination-item a {
+          color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        .dark-table .ant-pagination-item-active {
+          background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%) !important;
+          border-color: #a855f7 !important;
+        }
+
+        .dark-table .ant-pagination-item-active a {
+          color: #ffffff !important;
+        }
+
+        .dark-table .ant-select-selector {
+          background: rgba(45, 27, 78, 0.6) !important;
+          border: 1px solid rgba(168, 85, 247, 0.3) !important;
+          color: #ffffff !important;
+        }
+
+        .dark-table .ant-select-arrow {
+          color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        .dark-table .ant-pagination-options-quick-jumper input {
+          background: rgba(45, 27, 78, 0.6) !important;
+          border: 1px solid rgba(168, 85, 247, 0.3) !important;
+          color: #ffffff !important;
+        }
+      `}</style>
     </div>
   );
 }
