@@ -25,7 +25,27 @@ export class PatientsController {
   }
 
   @Get()
-  findAll() {
+  findAll(
+    @Query('status') status?: string,
+    @Query('assignedDoctorId') assignedDoctorId?: string,
+    @Query('sort') sort?: string,
+    @Query('order') order?: 'ASC' | 'DESC',
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    // If filters are provided, use advanced filtering
+    if (status || assignedDoctorId || sort || page || limit) {
+      return this.patientsService.findWithFilters({
+        status,
+        assignedDoctorId,
+        sort,
+        order,
+        page: page ? parseInt(page) : 1,
+        limit: limit ? parseInt(limit) : 20,
+      });
+    }
+
+    // Otherwise return all patients
     return this.patientsService.findAll();
   }
 

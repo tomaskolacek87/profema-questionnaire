@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dotazník - {{patientName}}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            font-size: 11pt;
+            line-height: 1.6;
+            color: #333;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #1890ff;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #1890ff;
+            font-size: 24pt;
+            margin-bottom: 5px;
+        }
+
+        .header .clinic-name {
+            font-size: 14pt;
+            color: #666;
+        }
+
+        .patient-info {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+
+        .patient-info h2 {
+            color: #1890ff;
+            font-size: 16pt;
+            margin-bottom: 15px;
+        }
+
+        .info-row {
+            display: flex;
+            margin-bottom: 10px;
+        }
+
+        .info-label {
+            font-weight: bold;
+            width: 180px;
+            color: #555;
+        }
+
+        .info-value {
+            flex: 1;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+
+        .section-title {
+            background: #1890ff;
+            color: white;
+            padding: 10px 15px;
+            font-size: 14pt;
+            font-weight: bold;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+
+        .field-group {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-left: 3px solid #e6f7ff;
+            background: #fafafa;
+        }
+
+        .field-label {
+            font-weight: bold;
+            color: #555;
+            margin-bottom: 5px;
+        }
+
+        .field-value {
+            margin-left: 10px;
+            color: #333;
+        }
+
+        .pregnancy-item {
+            background: white;
+            border: 1px solid #d9d9d9;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .pregnancy-number {
+            color: #1890ff;
+            font-weight: bold;
+            font-size: 12pt;
+            margin-bottom: 10px;
+        }
+
+        .footer {
+            margin-top: 50px;
+            border-top: 1px solid #d9d9d9;
+            padding-top: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 9pt;
+        }
+
+        .timestamp {
+            color: #999;
+            font-size: 9pt;
+            margin-top: 10px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+
+        table td {
+            padding: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        table td:first-child {
+            font-weight: bold;
+            width: 40%;
+            color: #555;
+        }
+
+        @media print {
+            body {
+                padding: 20px;
+            }
+
+            .section {
+                page-break-inside: avoid;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PROFEMA</h1>
+        <div class="clinic-name">Prenatální diagnostika a lékařská genetika</div>
+    </div>
+
+    <div class="patient-info">
+        <h2>Údaje pacientky</h2>
+        <table>
+            <tr>
+                <td>Jméno a příjmení:</td>
+                <td>{{patientName}}</td>
+            </tr>
+            <tr>
+                <td>Rodné číslo:</td>
+                <td>{{birthNumber}}</td>
+            </tr>
+            <tr>
+                <td>Datum narození:</td>
+                <td>{{birthDate}}</td>
+            </tr>
+            <tr>
+                <td>Adresa:</td>
+                <td>{{address}}</td>
+            </tr>
+            <tr>
+                <td>Telefon:</td>
+                <td>{{phone}}</td>
+            </tr>
+            <tr>
+                <td>Email:</td>
+                <td>{{email}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Současné těhotenství</div>
+        <table>
+            <tr>
+                <td>Datum posledních menses:</td>
+                <td>{{lastPeriod}}</td>
+            </tr>
+            <tr>
+                <td>Předpokládaný termín porodu:</td>
+                <td>{{expectedDueDate}}</td>
+            </tr>
+            <tr>
+                <td>Aktuální týden těhotenství:</td>
+                <td>{{currentWeek}}</td>
+            </tr>
+            <tr>
+                <td>Způsob početí:</td>
+                <td>{{conceptionMethod}}</td>
+            </tr>
+            <tr>
+                <td>Počet plodů:</td>
+                <td>{{numberOfFetuses}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Předchozí těhotenství</div>
+        {{previousPregnancies}}
+    </div>
+
+    <div class="section">
+        <div class="section-title">Zdravotní anamnéza</div>
+        <table>
+            <tr>
+                <td>Chronická onemocnění:</td>
+                <td>{{chronicDiseases}}</td>
+            </tr>
+            <tr>
+                <td>Pravidelně užívané léky:</td>
+                <td>{{medications}}</td>
+            </tr>
+            <tr>
+                <td>Alergie:</td>
+                <td>{{allergies}}</td>
+            </tr>
+            <tr>
+                <td>Předchozí operace:</td>
+                <td>{{surgeries}}</td>
+            </tr>
+            <tr>
+                <td>Rodinná anamnéza:</td>
+                <td>{{familyHistory}}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">Doplňující informace</div>
+        <div class="field-group">
+            <div class="field-value">{{additionalNotes}}</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p><strong>PROFEMA</strong> - Prenatální diagnostika a lékařská genetika</p>
+        <p class="timestamp">Dotazník vytvořen: {{createdAt}}</p>
+        <p>Tento dokument je důvěrný a podléhá ochraně osobních údajů</p>
+    </div>
+</body>
+</html>

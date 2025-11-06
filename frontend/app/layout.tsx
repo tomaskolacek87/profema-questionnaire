@@ -6,8 +6,8 @@ import { Providers } from './providers';
 import './globals.css';
 
 export const metadata = {
-  title: 'Profema - Gynekologickı dotazník',
-  description: 'Anamnestickı dotazník pro thotné pacientky',
+  title: 'Profema - GynekologickÃ½ dotaznÃ­k',
+  description: 'AnamnestickÃ½ dotaznÃ­k pro tÄ›hotnÃ© pacientky',
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

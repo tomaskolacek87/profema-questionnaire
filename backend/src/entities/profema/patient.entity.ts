@@ -27,10 +27,10 @@ export class Patient {
   @Column()
   last_name: string;
 
-  @Column({ type: 'date' })
-  birth_date: Date;
+  @Column({ nullable: true })
+  title: string;
 
-  @Column()
+  @Column({ nullable: true })
   birth_number: string; // Rodné číslo
 
   @Column({ nullable: true })
@@ -45,45 +45,41 @@ export class Patient {
   @Column({ nullable: true })
   email: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'address_street', nullable: true })
   address: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'address_city', nullable: true })
   city: string;
 
-  @Column({ nullable: true })
+  @Column({ name: 'address_zip', nullable: true })
   postal_code: string;
 
-  // Pregnancy Info
-  @Column({ type: 'date', nullable: true })
-  lmp_date: Date; // Last Menstrual Period
+  @Column({ nullable: true })
+  attending_gynecologist: string;
 
-  @Column({ type: 'date', nullable: true })
-  edd_date: Date; // Estimated Due Date
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  height_cm: number;
 
-  @Column({ type: 'integer', nullable: true })
-  gestational_weeks: number;
-
-  @Column({ type: 'integer', nullable: true })
-  gestational_days: number;
-
-  @Column({ default: false })
-  is_high_risk: boolean;
-
-  // Doctor Assignment
-  @ManyToOne(() => User)
-  @JoinColumn({ name: 'assigned_doctor_id' })
-  assigned_doctor: User;
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
+  weight_before_pregnancy_kg: number;
 
   @Column({ nullable: true })
-  assigned_doctor_id: string;
+  google_drive_folder_id: string;
 
-  // GDPR
   @Column({ default: false })
   gdpr_consent: boolean;
 
   @Column({ type: 'timestamp', nullable: true })
   gdpr_consent_date: Date;
+
+  @Column({ default: false })
+  data_processing_consent: boolean;
+
+  @Column({ default: false })
+  scientific_use_consent: boolean;
+
+  @Column({ nullable: true })
+  created_by: string;
 
   @CreateDateColumn()
   created_at: Date;
@@ -91,6 +87,6 @@ export class Patient {
   @UpdateDateColumn()
   updated_at: Date;
 
-  @Column({ nullable: true })
-  notes: string;
+  @Column({ default: true })
+  is_active: boolean;
 }

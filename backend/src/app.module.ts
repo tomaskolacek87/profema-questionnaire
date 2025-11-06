@@ -7,6 +7,8 @@ import { AuthModule } from '@modules/auth/auth.module';
 import { PatientsModule } from '@modules/patients/patients.module';
 import { QuestionnairesModule } from '@modules/questionnaires/questionnaires.module';
 import { GoogleModule } from '@modules/google/google.module';
+import { StatisticsModule } from '@modules/statistics/statistics.module';
+import { MagicLinksModule } from '@modules/magic-links/magic-links.module';
 
 @Module({
   imports: [
@@ -41,6 +43,8 @@ import { GoogleModule } from '@modules/google/google.module';
     PatientsModule,
     QuestionnairesModule,
     GoogleModule,
+    StatisticsModule,
+    MagicLinksModule,
   ],
 })
 export class AppModule {}

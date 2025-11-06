@@ -12,15 +12,24 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  console.log('🏗️ LoginPage component rendered');
+  console.log('📍 API URL:', process.env.NEXT_PUBLIC_API_URL);
+
   const onFinish = async (values: { email: string; password: string }) => {
+    console.log('🎯 onFinish called with:', values);
     setLoading(true);
     try {
+      console.log('🔐 Logging in with:', values.email);
+      console.log('🌐 Making request to:', `${process.env.NEXT_PUBLIC_API_URL}/auth/login`);
       const response = await authApi.login(values.email, values.password);
+      console.log('✅ Login response:', response.data);
       localStorage.setItem('auth_token', response.data.access_token);
       localStorage.setItem('user', JSON.stringify(response.data.user));
       message.success('Přihlášení úspěšné!');
       router.push('/dashboard');
     } catch (error: any) {
+      console.error('❌ Login error:', error);
+      console.error('❌ Error details:', error.response?.data);
       message.error(error.response?.data?.message || 'Chyba přihlášení');
     } finally {
       setLoading(false);
@@ -65,6 +74,17 @@ export default function LoginPage() {
               Přihlásit se
             </Button>
           </Form.Item>
+
+          <Button
+            onClick={() => {
+              console.log('🔴 TEST BUTTON CLICKED!');
+              alert('Test button works!');
+            }}
+            block
+            style={{ marginTop: 8 }}
+          >
+            Test kliknutí
+          </Button>
         </Form>
       </Card>
     </div>

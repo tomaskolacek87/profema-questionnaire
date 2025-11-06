@@ -1,0 +1,62 @@
+=== NOVÉ SOUBORY (16) ===
+
+BACKEND (7):
+✓ backend/src/modules/statistics/statistics.service.ts
+✓ backend/src/modules/statistics/statistics.controller.ts
+✓ backend/src/modules/statistics/statistics.module.ts
+✓ backend/src/common/interceptors/logging.interceptor.ts
+✓ backend/src/templates/questionnaire-pdf.html
+
+FRONTEND (11):
+✓ frontend/app/(dashboard)/patients/page.tsx
+✓ frontend/app/(dashboard)/questionnaire/[id]/view/page.tsx
+✓ frontend/components/common/ErrorBoundary.tsx
+✓ frontend/components/common/LoadingSkeleton.tsx
+✓ frontend/hooks/useFormAutoSave.ts
+
+DOKUMENTACE (1):
+✓ IMPLEMENTATION_SUMMARY.md
+
+=== MODIFIKOVANÉ SOUBORY (8) ===
+
+BACKEND (6):
+• backend/src/app.module.ts
+• backend/src/main.ts
+• backend/src/modules/google/google.controller.ts
+• backend/src/modules/google/google.service.ts
+• backend/src/modules/patients/patients.controller.ts
+• backend/src/modules/patients/patients.service.ts
+• backend/src/modules/questionnaires/questionnaires.controller.ts
+• backend/src/modules/questionnaires/questionnaires.service.ts
+
+FRONTEND (2):
+• frontend/app/(dashboard)/page.tsx
+• frontend/lib/api.ts
+
+=== NOVÉ API ENDPOINTY (8) ===
+
+1. GET /api/questionnaires/:id/pdf
+2. POST /api/google/upload-pdf
+3. GET /api/google/file-url/:fileId
+4. GET /api/statistics/overview
+5. GET /api/statistics/recent-activity
+6. GET /api/statistics/sync-status
+7. GET /api/statistics/date-range
+8. Enhanced: GET /api/patients (with filters)
+
+=== NOVÉ DEPENDENCIES ===
+
+Backend: (již nainstalováno v package.json)
+- puppeteer
+- googleapis
+- date-fns
+
+Frontend:
+- @ant-design/nextjs-registry (✓ nainstalováno)
+
+=== BUILD STATUS ===
+
+✅ Backend kompiluje bez chyb
+✅ Frontend type-check prošel
+✅ Všechny dependencies nainstalované
+✅ Ready for testing

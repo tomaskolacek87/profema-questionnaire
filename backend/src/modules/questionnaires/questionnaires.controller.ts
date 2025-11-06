@@ -9,7 +9,10 @@ import {
   UseGuards,
   Request,
   Patch,
+  Res,
+  Header,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { JwtAuthGuard } from '@common/guards/jwt-auth.guard';
 import { QuestionnairesService } from './questionnaires.service';
 import { CreateQuestionnaireDto } from './dto/create-questionnaire.dto';
@@ -52,5 +55,16 @@ export class QuestionnairesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.questionnairesService.remove(id);
+  }
+
+  @Get(':id/pdf')
+  @Header('Content-Type', 'application/pdf')
+  async downloadPdf(@Param('id') id: string, @Res() res: Response) {
+    const pdfBuffer = await this.questionnairesService.generatePdf(id);
+    res.set({
+      'Content-Disposition': `attachment; filename="questionnaire_${id}.pdf"`,
+      'Content-Length': pdfBuffer.length,
+    });
+    res.send(pdfBuffer);
   }
 }

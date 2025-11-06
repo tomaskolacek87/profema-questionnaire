@@ -53,3 +53,18 @@ export const googleApi = {
   uploadQuestionnaire: (questionnaireId: string) =>
     api.post(`/google/upload/${questionnaireId}`),
 };
+
+// Statistics API
+export const statisticsApi = {
+  getOverview: () => api.get('/statistics/overview'),
+  getRecentActivity: (limit?: number) => api.get(`/statistics/recent-activity${limit ? `?limit=${limit}` : ''}`),
+  getSyncStatus: () => api.get('/statistics/sync-status'),
+  getDateRange: (startDate: string, endDate: string) =>
+    api.get(`/statistics/date-range?startDate=${startDate}&endDate=${endDate}`),
+};
+
+// Enhanced Questionnaires API
+export const enhancedQuestionnairesApi = {
+  ...questionnairesApi,
+  downloadPdf: (id: string) => api.get(`/questionnaires/${id}/pdf`, { responseType: 'blob' }),
+};

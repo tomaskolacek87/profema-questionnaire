@@ -1,5 +1,5 @@
 import { Injectable, Logger, InternalServerErrorException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository, InjectDataSource } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { Patient } from '@entities/profema/patient.entity';
 import { AstraiaPatient } from '@entities/astraia/astraia-patient.entity';
@@ -14,6 +14,7 @@ export class PatientsService {
     private profemaPatientRepo: Repository<Patient>,
     @InjectRepository(AstraiaPatient, 'astraiaConnection')
     private astraiaPatientRepo: Repository<AstraiaPatient>,
+    @InjectDataSource('profemaConnection')
     private profemaDataSource: DataSource,
   ) {}
 
@@ -52,14 +53,16 @@ export class PatientsService {
       this.logger.log(`Astraia patient created with ID: ${savedAstraiaPatient.id}`);
 
       // STEP 2: Write to Profema DB with FK to Astraia
-      const profemaPatient = this.profemaPatientRepo.create({
+      const profemaPatientData = {
         ...createPatientDto,
         astraia_patient_id: savedAstraiaPatient.id,
         assigned_doctor_id: createPatientDto.assigned_doctor_id || userId,
         gdpr_consent_date: createPatientDto.gdpr_consent ? new Date() : null,
-      });
+      };
 
-      const savedProfemaPatient = await queryRunner.manager.save(profemaPatient);
+      const savedProfemaPatient = await queryRunner.manager.save(
+        queryRunner.manager.create(Patient, profemaPatientData)
+      );
       this.logger.log(`Profema patient created with UUID: ${savedProfemaPatient.id}`);
 
       // COMMIT - Both writes successful
@@ -115,5 +118,51 @@ export class PatientsService {
       .orderBy('patient.created_at', 'DESC')
       .limit(50)
       .getMany();
+  }
+
+  /**
+   * Advanced filtering with pagination
+   */
+  async findWithFilters(filters: {
+    status?: string;
+    assignedDoctorId?: string;
+    sort?: string;
+    order?: 'ASC' | 'DESC';
+    page?: number;
+    limit?: number;
+  }): Promise<{ data: Patient[]; total: number; page: number; totalPages: number }> {
+    const { status, assignedDoctorId, sort = 'created_at', order = 'DESC', page = 1, limit = 20 } = filters;
+
+    const queryBuilder = this.profemaPatientRepo
+      .createQueryBuilder('patient')
+      .leftJoinAndSelect('patient.assigned_doctor', 'doctor');
+
+    // Apply filters
+    if (status) {
+      queryBuilder.andWhere('patient.status = :status', { status });
+    }
+
+    if (assignedDoctorId) {
+      queryBuilder.andWhere('patient.assigned_doctor_id = :assignedDoctorId', { assignedDoctorId });
+    }
+
+    // Apply sorting
+    const validSortFields = ['created_at', 'first_name', 'last_name', 'date_of_birth'];
+    const sortField = validSortFields.includes(sort) ? sort : 'created_at';
+    queryBuilder.orderBy(`patient.${sortField}`, order);
+
+    // Apply pagination
+    const skip = (page - 1) * limit;
+    queryBuilder.skip(skip).take(limit);
+
+    // Execute query
+    const [data, total] = await queryBuilder.getManyAndCount();
+
+    return {
+      data,
+      total,
+      page,
+      totalPages: Math.ceil(total / limit),
+    };
   }
 }
