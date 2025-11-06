@@ -631,6 +631,11 @@ export default function PatientsPage() {
           background: rgba(168, 85, 247, 0.15) !important;
         }
 
+        .dark-table .ant-table-tbody > tr:hover > td {
+          background: transparent !important;
+          color: #ffffff !important;
+        }
+
         .dark-table .ant-table-tbody > tr > td {
           color: #ffffff !important;
           border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
