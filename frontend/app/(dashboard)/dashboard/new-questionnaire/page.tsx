@@ -2,14 +2,15 @@
 
 import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Card, Form, Input, Button, Steps, message, Typography, Checkbox, DatePicker, Space, InputNumber, Spin, Radio, Table, Divider, Row, Col, Layout, Avatar, Badge, Tooltip } from 'antd';
-import { ArrowLeftOutlined, SaveOutlined, PlusOutlined, DeleteOutlined, UserOutlined, FileTextOutlined, LogoutOutlined, BellOutlined } from '@ant-design/icons';
+import { Card, Form, Input, Button, Steps, message, Typography, Checkbox, DatePicker, Space, InputNumber, Spin, Radio, Table, Divider, Row, Col, Layout, Avatar, Badge, Tooltip, Select } from 'antd';
+import { ArrowLeftOutlined, SaveOutlined, PlusOutlined, DeleteOutlined, UserOutlined, FileTextOutlined, LogoutOutlined, BellOutlined, DashboardOutlined } from '@ant-design/icons';
 import axios from 'axios';
 import dayjs from 'dayjs';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
 const { Header, Content } = Layout;
+const { Option } = Select;
 
 function QuestionnaireForm() {
   const router = useRouter();
@@ -44,6 +45,7 @@ function QuestionnaireForm() {
           patient_id: patientId,
           type: 'pregnant',
           basic_info: {
+            title: values.title,
             first_name: values.first_name,
             last_name: values.last_name,
             birth_number: values.birth_number,
@@ -120,7 +122,7 @@ function QuestionnaireForm() {
       );
 
       message.success('Dotazník byl úspěšně uložen!');
-      router.push('/dashboard/questionnaires');
+      router.push('/questionnaires');
     } catch (error: any) {
       console.error('Error saving questionnaire:', error);
       message.error(error.response?.data?.message || 'Chyba při ukládání dotazníku');
@@ -176,143 +178,6 @@ function QuestionnaireForm() {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      {/* Dark Sidebar Menu */}
-      <Layout.Sider
-        width={250}
-        style={{
-          background: 'linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 100%)',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.3)'
-        }}
-      >
-        <div style={{
-          padding: '24px',
-          textAlign: 'center',
-          borderBottom: '1px solid rgba(255,255,255,0.1)'
-        }}>
-          <Title level={3} style={{ margin: 0, color: 'white', fontWeight: 700 }}>
-            Profema
-          </Title>
-          <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>
-            Gynekologický dotazník
-          </Text>
-        </div>
-
-        <div style={{ marginTop: 16 }}>
-          <div
-            onClick={() => router.push('/dashboard')}
-            style={{
-              padding: '16px 24px',
-              cursor: 'pointer',
-              color: 'rgba(255,255,255,0.7)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
-            }}
-          >
-            <UserOutlined style={{ fontSize: 18 }} />
-            <span style={{ fontWeight: 500 }}>Pacientky</span>
-          </div>
-          <div
-            onClick={() => router.push('/dashboard/questionnaires')}
-            style={{
-              padding: '16px 24px',
-              cursor: 'pointer',
-              background: 'rgba(168, 85, 247, 0.2)',
-              borderLeft: '4px solid #a855f7',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12
-            }}
-          >
-            <FileTextOutlined style={{ fontSize: 18 }} />
-            <span style={{ fontWeight: 500 }}>Dotazníky</span>
-          </div>
-        </div>
-      </Layout.Sider>
-
-      <Layout style={{ background: '#1a1a2e' }}>
-        {/* Modern Header / Status Bar */}
-        <Header
-          style={{
-            background: 'linear-gradient(135deg, #2d1b4e 0%, #1a1a2e 100%)',
-            padding: '0 32px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-            height: 64
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <Button
-              icon={<ArrowLeftOutlined />}
-              onClick={() => router.push('/dashboard/questionnaires')}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.2)'
-              }}
-            >
-              Zpět
-            </Button>
-            <div>
-              <Title level={4} style={{ margin: 0, color: 'white' }}>
-                Dotazník pro těhotné
-              </Title>
-              <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 12 }}>
-                PROFEMA - Centrum fetální medicíny
-              </Text>
-            </div>
-          </div>
-
-          <Space size="large">
-            <Tooltip title="Notifikace">
-              <Badge count={0} showZero={false}>
-                <BellOutlined style={{ fontSize: 20, color: 'white', cursor: 'pointer' }} />
-              </Badge>
-            </Tooltip>
-
-            <Space size={12}>
-              <Avatar style={{ backgroundColor: '#a855f7' }}>
-                {user?.first_name?.[0]}{user?.last_name?.[0]}
-              </Avatar>
-              <div>
-                <div style={{ color: 'white', fontWeight: 500, fontSize: 14, lineHeight: '20px' }}>
-                  {user?.first_name} {user?.last_name}
-                </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: '16px' }}>
-                  {user?.role === 'admin' ? 'Administrátor' : 'Lékař'}
-                </div>
-              </div>
-            </Space>
-
-            <Button
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.2)'
-              }}
-            >
-              Odhlásit
-            </Button>
-          </Space>
-        </Header>
-
-        <Content style={{ padding: '32px', background: '#1a1a2e' }}>
           <div style={{ maxWidth: 1000, margin: '0 auto' }}>
 
         <Card
@@ -366,14 +231,19 @@ function QuestionnaireForm() {
                 <Title level={4} style={{ color: '#ffffff', marginBottom: 24 }}>Základní údaje</Title>
 
                 <Row gutter={16}>
-                  <Col span={12}>
+                  <Col span={6}>
+                    <Form.Item name="title" label={<Text style={{ color: '#ffffff' }}>Titul</Text>}>
+                      <Input size="large" placeholder="MUDr., Ing..." />
+                    </Form.Item>
+                  </Col>
+                  <Col span={9}>
                     <Form.Item name="first_name" label={<Text style={{ color: '#ffffff' }}>Jméno</Text>} rules={[{ required: true, message: 'Povinné pole' }]}>
                       <Input size="large" placeholder="Jméno" />
                     </Form.Item>
                   </Col>
-                  <Col span={12}>
-                    <Form.Item name="last_name" label={<Text style={{ color: '#ffffff' }}>Příjmení, titul</Text>} rules={[{ required: true, message: 'Povinné pole' }]}>
-                      <Input size="large" placeholder="Příjmení, titul" />
+                  <Col span={9}>
+                    <Form.Item name="last_name" label={<Text style={{ color: '#ffffff' }}>Příjmení</Text>} rules={[{ required: true, message: 'Povinné pole' }]}>
+                      <Input size="large" placeholder="Příjmení" />
                     </Form.Item>
                   </Col>
                 </Row>
@@ -386,7 +256,15 @@ function QuestionnaireForm() {
                   </Col>
                   <Col span={12}>
                     <Form.Item name="insurance_company" label={<Text style={{ color: '#ffffff' }}>Zdravotní pojišťovna</Text>}>
-                      <Input size="large" placeholder="Zdravotní pojišťovna" />
+                      <Select size="large" placeholder="Vyberte pojišťovnu">
+                        <Option value="111">111 - VZP</Option>
+                        <Option value="201">201 - VOZP</Option>
+                        <Option value="205">205 - ČPZP</Option>
+                        <Option value="207">207 - OZP</Option>
+                        <Option value="209">209 - ZPŠ</Option>
+                        <Option value="211">211 - ZPMV</Option>
+                        <Option value="213">213 - RBP</Option>
+                      </Select>
                     </Form.Item>
                   </Col>
                 </Row>
@@ -1076,10 +954,7 @@ function QuestionnaireForm() {
             </div>
           </Form>
         </Card>
-          </div>
-        </Content>
-      </Layout>
-    </Layout>
+      </div>
   );
 }
 

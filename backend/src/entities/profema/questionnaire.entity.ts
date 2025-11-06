@@ -61,6 +61,20 @@ export class Questionnaire {
   @Column({ nullable: true })
   google_drive_file_id: string;
 
+  // Public Token for email questionnaires
+  @Column({ nullable: true, unique: true })
+  @Index()
+  public_token: string;
+
+  @Column({ type: 'timestamp', nullable: true })
+  token_expires_at: Date;
+
+  @Column({ default: false })
+  token_used: boolean;
+
+  @Column({ nullable: true })
+  type: string; // 'pregnant', 'gynecology', 'ultrasound'
+
   @CreateDateColumn()
   created_at: Date;
 

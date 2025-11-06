@@ -67,4 +67,21 @@ export class QuestionnairesController {
     });
     res.send(pdfBuffer);
   }
+
+  /**
+   * Create public questionnaire with token and return URL
+   * Used by receptionist to send questionnaire to patient via email
+   */
+  @Post('send/:patientId')
+  async sendQuestionnaire(
+    @Param('patientId') patientId: string,
+    @Body() body: { type: 'pregnant' | 'gynecology' | 'ultrasound' },
+    @Request() req,
+  ) {
+    return this.questionnairesService.createPublicQuestionnaire(
+      patientId,
+      body.type,
+      req.user.userId,
+    );
+  }
 }

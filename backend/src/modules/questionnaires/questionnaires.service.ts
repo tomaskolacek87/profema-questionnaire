@@ -1,13 +1,16 @@
-import { Injectable, NotFoundException, Logger } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Questionnaire } from '@entities/profema/questionnaire.entity';
+import { Patient } from '@entities/profema/patient.entity';
+import { AstraiaPatient } from '@entities/astraia/astraia-patient.entity';
 import { CreateQuestionnaireDto } from './dto/create-questionnaire.dto';
 import * as puppeteer from 'puppeteer';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { format } from 'date-fns';
 import { cs } from 'date-fns/locale';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class QuestionnairesService {
@@ -16,6 +19,10 @@ export class QuestionnairesService {
   constructor(
     @InjectRepository(Questionnaire, 'profemaConnection')
     private questionnaireRepo: Repository<Questionnaire>,
+    @InjectRepository(Patient, 'profemaConnection')
+    private patientRepo: Repository<Patient>,
+    @InjectRepository(AstraiaPatient, 'astraiaConnection')
+    private astraiaPatientRepo: Repository<AstraiaPatient>,
   ) {}
 
   async create(
@@ -214,5 +221,152 @@ export class QuestionnairesService {
     });
 
     return html;
+  }
+
+  /**
+   * Generate unique token for public questionnaire access
+   */
+  private generateToken(): string {
+    return randomBytes(32).toString('hex');
+  }
+
+  /**
+   * Create draft questionnaire with public token and send email
+   */
+  async createPublicQuestionnaire(
+    patientId: string,
+    questionnaireType: 'pregnant' | 'gynecology' | 'ultrasound',
+    userId: string,
+  ): Promise<{ questionnaire: Questionnaire; publicUrl: string }> {
+    // Load patient data - try both UUID (Profema) and INTEGER (Astraia)
+    let patient: Patient | null = null;
+
+    // First try as INTEGER (Astraia ID)
+    const astraiaId = parseInt(patientId, 10);
+    if (!isNaN(astraiaId)) {
+      patient = await this.patientRepo.findOne({ where: { astraia_patient_id: astraiaId } });
+
+      // If not found in Profema, load from Astraia and create in Profema
+      if (!patient) {
+        const astraiaPatient = await this.astraiaPatientRepo.findOne({ where: { id: astraiaId } });
+        if (astraiaPatient) {
+          this.logger.log(`Creating Profema record for Astraia patient ${astraiaId}`);
+          patient = this.patientRepo.create({
+            astraia_patient_id: astraiaId,
+            first_name: astraiaPatient.other_names || '',
+            last_name: astraiaPatient.name || '',
+            birth_date: astraiaPatient.dob,
+            birth_number: astraiaPatient.hospital_number || '',
+            insurance_number: astraiaPatient.ohip || '',
+            assigned_doctor_id: userId,
+            is_active: true,
+          });
+          patient = await this.patientRepo.save(patient);
+          this.logger.log(`Created Profema patient ${patient.id} for Astraia ID ${astraiaId}`);
+        }
+      }
+    }
+
+    // If not found, try as UUID (Profema ID)
+    if (!patient) {
+      try {
+        patient = await this.patientRepo.findOne({ where: { id: patientId } });
+      } catch (error) {
+        // UUID format error, ignore
+      }
+    }
+
+    if (!patient) {
+      throw new NotFoundException('Patient not found');
+    }
+
+    // Email is optional - receptionist can copy the link and send it manually
+    this.logger.log(`Creating questionnaire for patient ${patientId}, email: ${patient.email || 'not provided'}`);
+
+    // Generate token and expiration (7 days)
+    const token = this.generateToken();
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    // Create DRAFT questionnaire with pre-filled patient data
+    const questionnaire = this.questionnaireRepo.create({
+      patient_id: patient.id,
+      created_by_user_id: userId,
+      type: questionnaireType,
+      status: 'draft',
+      public_token: token,
+      token_expires_at: expiresAt,
+      token_used: false,
+      // Pre-fill basic info from patient profile
+      basic_info: {
+        title: patient.title || '',
+        first_name: patient.first_name || '',
+        last_name: patient.last_name || '',
+        birth_number: patient.birth_number || '',
+        address: patient.address || '',
+        phone: patient.phone || '',
+        email: patient.email || '',
+        insurance_company: patient.insurance_company || '',
+      },
+      pregnancy_info: {},
+      health_history: {},
+      previous_pregnancies: {},
+      additional_notes: {},
+    });
+
+    const saved = await this.questionnaireRepo.save(questionnaire);
+
+    // Generate public URL
+    const baseUrl = process.env.FRONTEND_URL || 'https://301.tkservis.cz';
+    const publicUrl = `${baseUrl}/q/${token}`;
+
+    this.logger.log(`Created public questionnaire for patient ${patientId}, token: ${token}, expires: ${expiresAt}`);
+
+    return { questionnaire: saved, publicUrl };
+  }
+
+  /**
+   * Get questionnaire by public token
+   */
+  async findByToken(token: string): Promise<Questionnaire> {
+    const questionnaire = await this.questionnaireRepo.findOne({
+      where: { public_token: token },
+      relations: ['patient'],
+    });
+
+    if (!questionnaire) {
+      throw new NotFoundException('Questionnaire not found');
+    }
+
+    // Check if token is expired
+    if (questionnaire.token_expires_at && new Date() > questionnaire.token_expires_at) {
+      throw new BadRequestException('Token has expired');
+    }
+
+    // Check if token already used
+    if (questionnaire.token_used) {
+      throw new BadRequestException('This questionnaire has already been completed');
+    }
+
+    return questionnaire;
+  }
+
+  /**
+   * Update questionnaire via public token
+   */
+  async updateByToken(token: string, updateData: Partial<CreateQuestionnaireDto>): Promise<Questionnaire> {
+    const questionnaire = await this.findByToken(token);
+
+    // Mark as completed and token as used
+    await this.questionnaireRepo.update(questionnaire.id, {
+      ...updateData,
+      status: 'completed',
+      completed_at: new Date(),
+      token_used: true,
+    });
+
+    this.logger.log(`Questionnaire ${questionnaire.id} completed via token ${token}`);
+
+    return this.findOne(questionnaire.id);
   }
 }

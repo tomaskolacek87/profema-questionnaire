@@ -5,12 +5,11 @@ import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import {
   Row, Col, Card, Statistic, Table, Button, Input, Space, Typography,
-  Tag, Spin, Empty, Avatar, Badge, Tooltip, Layout
+  Tag, Spin, Empty, Avatar, Tooltip, Badge
 } from 'antd';
 import {
   PlusOutlined,
   SearchOutlined,
-  FileTextOutlined,
   UserOutlined,
   CheckCircleOutlined,
   ClockCircleOutlined,
@@ -18,8 +17,7 @@ import {
   EyeOutlined,
   RiseOutlined,
   TeamOutlined,
-  LogoutOutlined,
-  BellOutlined
+  FileTextOutlined
 } from '@ant-design/icons';
 import { patientsApi, statisticsApi } from '@/lib/api';
 import { format } from 'date-fns';
@@ -27,7 +25,6 @@ import { cs } from 'date-fns/locale';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
-const { Header, Content } = Layout;
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -40,12 +37,6 @@ export default function DashboardPage() {
       setUser(JSON.parse(userData));
     }
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem('auth_token');
-    localStorage.removeItem('user');
-    router.push('/login');
-  };
 
   // Fetch statistics
   const { data: stats, isLoading: statsLoading } = useQuery({
@@ -154,136 +145,19 @@ export default function DashboardPage() {
   );
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      {/* Dark Sidebar Menu */}
-      <Layout.Sider
-        width={250}
-        style={{
-          background: 'linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 100%)',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.3)'
-        }}
-      >
-        <div style={{
-          padding: '24px',
-          textAlign: 'center',
-          borderBottom: '1px solid rgba(255,255,255,0.1)'
-        }}>
-          <Title level={3} style={{ margin: 0, color: 'white', fontWeight: 700 }}>
-            Profema
-          </Title>
-          <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>
-            Gynekologický dotazník
-          </Text>
-        </div>
-
-        <div style={{ marginTop: 16 }}>
-          <div
-            onClick={() => router.push('/dashboard')}
-            style={{
-              padding: '16px 24px',
-              cursor: 'pointer',
-              background: 'rgba(168, 85, 247, 0.2)',
-              borderLeft: '4px solid #a855f7',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12
-            }}
-          >
-            <UserOutlined style={{ fontSize: 18 }} />
-            <span style={{ fontWeight: 500 }}>Pacientky</span>
-          </div>
-          <div
-            onClick={() => router.push('/dashboard/questionnaires')}
-            style={{
-              padding: '16px 24px',
-              cursor: 'pointer',
-              color: 'rgba(255,255,255,0.7)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
-            }}
-          >
-            <FileTextOutlined style={{ fontSize: 18 }} />
-            <span style={{ fontWeight: 500 }}>Dotazníky</span>
-          </div>
-        </div>
-      </Layout.Sider>
-
-      <Layout style={{ background: '#1a1a2e' }}>
-        {/* Modern Header / Status Bar */}
-        <Header
-          style={{
-            background: 'linear-gradient(135deg, #2d1b4e 0%, #1a1a2e 100%)',
-            padding: '0 32px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-            height: 64
-          }}
-        >
-          <Title level={4} style={{ margin: 0, color: 'white' }}>
-            Dashboard
-          </Title>
-
-          <Space size="large">
-            <Tooltip title="Notifikace">
-              <Badge count={0} showZero={false}>
-                <BellOutlined style={{ fontSize: 20, color: 'white', cursor: 'pointer' }} />
-              </Badge>
-            </Tooltip>
-
-            <Space size={12}>
-              <Avatar style={{ backgroundColor: '#a855f7' }}>
-                {user?.first_name?.[0]}{user?.last_name?.[0]}
-              </Avatar>
-              <div>
-                <div style={{ color: 'white', fontWeight: 500, fontSize: 14, lineHeight: '20px' }}>
-                  {user?.first_name} {user?.last_name}
-                </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: '16px' }}>
-                  {user?.role === 'admin' ? 'Administrátor' : 'Lékař'}
-                </div>
-              </div>
-            </Space>
-
-            <Button
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.2)'
-              }}
-            >
-              Odhlásit
-            </Button>
-          </Space>
-        </Header>
-
-      <Content style={{ padding: '32px', background: '#1a1a2e' }}>
+    <div style={{ background: '#1a1a2e', minHeight: '100vh', padding: '24px' }}>
+      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
         {/* Welcome Section */}
         <div style={{ marginBottom: 32 }}>
-          <Title level={2} style={{ margin: 0, marginBottom: 8, color: '#ffffff' }}>
-            Vítejte zpět, {user?.first_name}! 👋
-          </Title>
-          <Text style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)' }}>
-            {format(new Date(), 'EEEE, d. MMMM yyyy', { locale: cs })}
-          </Text>
-        </div>
+        <Title level={2} style={{ margin: 0, marginBottom: 8, color: '#ffffff' }}>
+          Vítejte zpět, {user?.first_name}! 👋
+        </Title>
+        <Text style={{ fontSize: 16, color: 'rgba(255,255,255,0.6)' }}>
+          {format(new Date(), 'EEEE, d. MMMM yyyy', { locale: cs })}
+        </Text>
+      </div>
 
-        {/* Quick Actions */}
+      {/* Quick Actions */}
         <Space size="large" style={{ marginBottom: 32 }}>
           <Button
             type="primary"
@@ -326,7 +200,7 @@ export default function DashboardPage() {
         ) : (
           <Row gutter={[24, 24]} style={{ marginBottom: 32 }}>
             <Col xs={24} sm={12} lg={6}>
-              <Card bordered={false} style={{
+              <Card variant="borderless" style={{
                 borderRadius: 12,
                 background: 'linear-gradient(135deg, #2d1b4e 0%, #1e1536 100%)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
@@ -344,7 +218,7 @@ export default function DashboardPage() {
               </Card>
             </Col>
             <Col xs={24} sm={12} lg={6}>
-              <Card bordered={false} style={{
+              <Card variant="borderless" style={{
                 borderRadius: 12,
                 background: 'linear-gradient(135deg, #1e3a20 0%, #152818 100%)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
@@ -362,7 +236,7 @@ export default function DashboardPage() {
               </Card>
             </Col>
             <Col xs={24} sm={12} lg={6}>
-              <Card bordered={false} style={{
+              <Card variant="borderless" style={{
                 borderRadius: 12,
                 background: 'linear-gradient(135deg, #3d2b1f 0%, #2d1f15 100%)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
@@ -380,7 +254,7 @@ export default function DashboardPage() {
               </Card>
             </Col>
             <Col xs={24} sm={12} lg={6}>
-              <Card bordered={false} style={{
+              <Card variant="borderless" style={{
                 borderRadius: 12,
                 background: 'linear-gradient(135deg, #3d1f1f 0%, #2d1515 100%)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
@@ -415,7 +289,7 @@ export default function DashboardPage() {
                   Zobrazit vše →
                 </Button>
               }
-              bordered={false}
+              variant="borderless"
               style={{
                 borderRadius: 12,
                 background: '#16213e',
@@ -473,7 +347,7 @@ export default function DashboardPage() {
                   Zobrazit vše →
                 </Button>
               }
-              bordered={false}
+              variant="borderless"
               style={{
                 borderRadius: 12,
                 background: '#16213e',
@@ -528,7 +402,7 @@ export default function DashboardPage() {
               <Text strong style={{ fontSize: 16, color: '#ffffff' }}>Seznam pacientek</Text>
             </Space>
           }
-          bordered={false}
+          variant="borderless"
           style={{
             borderRadius: 12,
             background: '#16213e',
@@ -555,8 +429,7 @@ export default function DashboardPage() {
             style={{ marginTop: 16 }}
           />
         </Card>
-      </Content>
-      </Layout>
-    </Layout>
+      </div>
+    </div>
   );
 }

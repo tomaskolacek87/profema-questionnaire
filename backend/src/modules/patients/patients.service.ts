@@ -89,25 +89,56 @@ export class PatientsService {
   }
 
   /**
-   * Load all patients from Astraia database
-   * Transform Astraia column names to frontend-friendly format
+   * Load all patients from Astraia database with enriched Profema data
+   * Joins Astraia patients with Profema contact details via astraia_patient_id
    */
   async findAllFromAstraia(): Promise<any[]> {
-    this.logger.log('Loading patients from Astraia database...');
-    const patients = await this.astraiaPatientRepo.find({
-      order: { last_visit: 'DESC' }, // Astraia uses 'last_visit' not 'created_at'
-    });
-    this.logger.log(`Loaded ${patients.length} patients from Astraia`);
+    this.logger.log('Loading patients from Astraia database with Profema contact details...');
 
-    // Transform Astraia column names to match frontend expectations
-    return patients.map(p => ({
-      ...p,
-      first_name: p.other_names || '',
-      last_name: p.name || '',
-      birth_date: p.dob,
-      birth_number: p.hospital_number || '',
-      created_at: p.first_contact || p.last_visit, // Fallback for sorting
-    }));
+    // Load all Astraia patients
+    const astraiaPatients = await this.astraiaPatientRepo.find({
+      order: { last_visit: 'DESC' },
+    });
+    this.logger.log(`Loaded ${astraiaPatients.length} patients from Astraia`);
+
+    // Load all Profema patients (with contact details)
+    const profemaPatients = await this.profemaPatientRepo.find();
+    this.logger.log(`Loaded ${profemaPatients.length} patients from Profema`);
+
+    // Create a map of Profema patients by astraia_patient_id for quick lookup
+    const profemaMap = new Map<number, Patient>();
+    profemaPatients.forEach(p => {
+      if (p.astraia_patient_id) {
+        profemaMap.set(p.astraia_patient_id, p);
+      }
+    });
+
+    // Merge Astraia data with Profema contact details
+    return astraiaPatients.map(astraia => {
+      const profema = profemaMap.get(astraia.id);
+
+      return {
+        id: profema?.id || astraia.id, // Use Profema UUID if exists, otherwise Astraia ID
+        astraia_id: astraia.id,
+        first_name: astraia.other_names || '',
+        last_name: astraia.name || '',
+        birth_date: astraia.dob,
+        birth_number: astraia.hospital_number || '',
+        created_at: astraia.first_contact || astraia.last_visit,
+
+        // Contact details from Profema DB (if patient exists there)
+        email: profema?.email || null,
+        phone: profema?.phone || null,
+        address: profema?.address || null,
+        city: profema?.city || null,
+        postal_code: profema?.postal_code || null,
+        insurance_company: profema?.insurance_company || null,
+        gdpr_consent: profema?.gdpr_consent || false,
+
+        // Keep original Astraia data for compatibility
+        ...astraia,
+      };
+    });
   }
 
   async findOne(id: string): Promise<Patient> {

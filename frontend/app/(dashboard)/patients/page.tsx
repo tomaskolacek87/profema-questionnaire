@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Card, Table, Button, Input, Space, Typography, Tag, Spin, Empty, Tooltip, Layout, Avatar, Badge, Modal, Form, Row, Col, Select, Checkbox, DatePicker
+  Card, Table, Button, Input, Space, Typography, Tag, Spin, Empty, Tooltip, Avatar, Badge, Modal, Form, Row, Col, Select, Checkbox, DatePicker
 } from 'antd';
 import {
   PlusOutlined,
@@ -26,7 +26,6 @@ import { cs } from 'date-fns/locale';
 
 const { Title, Text } = Typography;
 const { Search } = Input;
-const { Header, Content } = Layout;
 
 export default function PatientsPage() {
   const router = useRouter();
@@ -36,6 +35,11 @@ export default function PatientsPage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [editingPatient, setEditingPatient] = useState<any>(null);
   const [form] = Form.useForm();
+  const [isSendModalVisible, setIsSendModalVisible] = useState(false);
+  const [selectedPatient, setSelectedPatient] = useState<any>(null);
+  const [sendingQuestionnaire, setSendingQuestionnaire] = useState(false);
+  const [isSuccessModalVisible, setIsSuccessModalVisible] = useState(false);
+  const [generatedUrl, setGeneratedUrl] = useState('');
 
   useEffect(() => {
     const userData = localStorage.getItem('user');
@@ -144,6 +148,38 @@ export default function PatientsPage() {
     });
   };
 
+  const handleSendQuestionnaire = async (questionnaireType: 'pregnant' | 'gynecology' | 'ultrasound') => {
+    if (!selectedPatient) return;
+
+    setSendingQuestionnaire(true);
+    try {
+      console.log('Sending questionnaire...', questionnaireType, selectedPatient.id);
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/questionnaires/send/${selectedPatient.id}`,
+        { type: questionnaireType },
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('auth_token')}`
+          }
+        }
+      );
+
+      console.log('Response received:', response.data);
+
+      // Copy to clipboard
+      await navigator.clipboard.writeText(response.data.publicUrl);
+
+      // Show success modal
+      setGeneratedUrl(response.data.publicUrl);
+      setIsSendModalVisible(false);
+      setIsSuccessModalVisible(true);
+    } catch (error: any) {
+      alert('Chyba při odesílání dotazníku: ' + (error.response?.data?.message || 'Nepodařilo se odeslat dotazník.'));
+    } finally {
+      setSendingQuestionnaire(false);
+    }
+  };
+
   const columns = [
     {
       title: 'Pacientka',
@@ -208,7 +244,7 @@ export default function PatientsPage() {
       key: 'actions',
       render: (_: any, record: any) => (
         <Space>
-          <Tooltip title="Poslat dotazník">
+          <Tooltip title="Poslat dotazník emailem">
             <Button
               type="primary"
               icon={<SendOutlined />}
@@ -217,9 +253,12 @@ export default function PatientsPage() {
                 background: 'linear-gradient(135deg, #a855f7 0%, #ec4899 100%)',
                 border: 'none'
               }}
-              onClick={() => router.push(`/dashboard/new-questionnaire?patientId=${record.id}`)}
+              onClick={() => {
+                setSelectedPatient(record);
+                setIsSendModalVisible(true);
+              }}
             >
-              Dotazník
+              Poslat dotazník
             </Button>
           </Tooltip>
           <Tooltip title="Upravit">
@@ -251,151 +290,10 @@ export default function PatientsPage() {
   );
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
-      {/* Dark Sidebar Menu */}
-      <Layout.Sider
-        width={250}
-        style={{
-          background: 'linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 100%)',
-          boxShadow: '2px 0 8px rgba(0,0,0,0.3)'
-        }}
-      >
-        <div style={{
-          padding: '24px',
-          textAlign: 'center',
-          borderBottom: '1px solid rgba(255,255,255,0.1)'
-        }}>
-          <Title level={3} style={{ margin: 0, color: 'white', fontWeight: 700 }}>
-            Profema
-          </Title>
-          <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 13 }}>
-            Gynekologický dotazník
-          </Text>
-        </div>
-
-        <div style={{ marginTop: 16 }}>
-          <div
-            onClick={() => router.push('/dashboard')}
-            style={{
-              padding: '16px 24px',
-              cursor: 'pointer',
-              color: 'rgba(255,255,255,0.7)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
-            }}
-          >
-            <DashboardOutlined style={{ fontSize: 18 }} />
-            <span style={{ fontWeight: 500 }}>Dashboard</span>
-          </div>
-          <div
-            onClick={() => router.push('/patients')}
-            style={{
-              padding: '16px 24px',
-              cursor: 'pointer',
-              background: 'rgba(168, 85, 247, 0.2)',
-              borderLeft: '4px solid #a855f7',
-              color: 'white',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12
-            }}
-          >
-            <UserOutlined style={{ fontSize: 18 }} />
-            <span style={{ fontWeight: 500 }}>Pacientky</span>
-          </div>
-          <div
-            onClick={() => router.push('/dashboard/questionnaires')}
-            style={{
-              padding: '16px 24px',
-              cursor: 'pointer',
-              color: 'rgba(255,255,255,0.7)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 12,
-              transition: 'all 0.3s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255,255,255,0.05)';
-              e.currentTarget.style.color = 'white';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = 'rgba(255,255,255,0.7)';
-            }}
-          >
-            <FileTextOutlined style={{ fontSize: 18 }} />
-            <span style={{ fontWeight: 500 }}>Dotazníky</span>
-          </div>
-        </div>
-      </Layout.Sider>
-
-      <Layout style={{ background: '#1a1a2e' }}>
-        {/* Modern Header / Status Bar */}
-        <Header
-          style={{
-            background: 'linear-gradient(135deg, #2d1b4e 0%, #1a1a2e 100%)',
-            padding: '0 32px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-            borderBottom: '1px solid rgba(255,255,255,0.1)',
-            height: 64
-          }}
-        >
-          <Title level={4} style={{ margin: 0, color: 'white' }}>
-            Pacientky
-          </Title>
-
-          <Space size="large">
-            <Tooltip title="Notifikace">
-              <Badge count={0} showZero={false}>
-                <BellOutlined style={{ fontSize: 20, color: 'white', cursor: 'pointer' }} />
-              </Badge>
-            </Tooltip>
-
-            <Space size={12}>
-              <Avatar style={{ backgroundColor: '#a855f7' }}>
-                {user?.first_name?.[0]}{user?.last_name?.[0]}
-              </Avatar>
-              <div>
-                <div style={{ color: 'white', fontWeight: 500, fontSize: 14, lineHeight: '20px' }}>
-                  {user?.first_name} {user?.last_name}
-                </div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', lineHeight: '16px' }}>
-                  {user?.role === 'admin' ? 'Administrátor' : 'Lékař'}
-                </div>
-              </div>
-            </Space>
-
-            <Button
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-              style={{
-                background: 'rgba(255,255,255,0.1)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.2)'
-              }}
-            >
-              Odhlásit
-            </Button>
-          </Space>
-        </Header>
-
-        <Content style={{ padding: '32px', background: '#1a1a2e' }}>
-          <div style={{ maxWidth: 1400, margin: '0 auto' }}>
-            {/* Actions and Search */}
-            <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 24 }}>
+    <div style={{ background: '#1a1a2e', minHeight: '100vh', padding: '24px' }}>
+      <div style={{ maxWidth: 1400, margin: '0 auto' }}>
+        {/* Actions and Search */}
+        <div style={{ marginBottom: 32, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 24 }}>
               <div>
                 <Text style={{ color: 'rgba(255,255,255,0.6)', fontSize: 16 }}>
                   Přehled všech pacientek
@@ -428,7 +326,7 @@ export default function PatientsPage() {
               marginBottom: 32
             }}>
               <Card
-                bordered={false}
+                variant="borderless"
                 style={{
                   background: 'linear-gradient(135deg, #2d1b4e 0%, #1e1536 100%)',
                   border: '1px solid rgba(168, 85, 247, 0.2)',
@@ -457,7 +355,7 @@ export default function PatientsPage() {
                   <Text strong style={{ fontSize: 16, color: '#ffffff' }}>Seznam pacientek</Text>
                 </Space>
               }
-              bordered={false}
+              variant="borderless"
               style={{
                 borderRadius: 12,
                 background: '#16213e',
@@ -518,23 +416,20 @@ export default function PatientsPage() {
                 />
               )}
             </Card>
-          </div>
-        </Content>
-      </Layout>
+      </div>
 
-      {/* Create/Edit Patient Modal */}
       <Modal
-        title={isEditMode ? "Upravit pacientku" : "Nová pacientka"}
-        open={isModalVisible}
-        onCancel={() => {
-          setIsModalVisible(false);
-          setIsEditMode(false);
-          setEditingPatient(null);
-          form.resetFields();
-        }}
-        footer={null}
-        width={700}
-      >
+          title={isEditMode ? "Upravit pacientku" : "Nová pacientka"}
+          open={isModalVisible}
+          onCancel={() => {
+            setIsModalVisible(false);
+            setIsEditMode(false);
+            setEditingPatient(null);
+            form.resetFields();
+          }}
+          footer={null}
+          width={700}
+        >
         <Form form={form} layout="vertical" onFinish={handleCreatePatient}>
           <Row gutter={16}>
             <Col span={12}>
@@ -690,6 +585,129 @@ export default function PatientsPage() {
           color: #ffffff !important;
         }
       `}</style>
-    </Layout>
+
+      <Modal
+        title="Poslat dotazník pacientce"
+        open={isSendModalVisible}
+        onCancel={() => {
+          setIsSendModalVisible(false);
+          setSelectedPatient(null);
+        }}
+        footer={null}
+        width={500}
+      >
+        {selectedPatient && (
+          <div>
+            <div style={{ marginBottom: 24, padding: 16, background: '#f5f5f5', borderRadius: 8 }}>
+              <Text strong>Pacientka: </Text>
+              <Text>{selectedPatient.first_name} {selectedPatient.last_name}</Text>
+              <br />
+              <Text strong>Email: </Text>
+              <Text>{selectedPatient.email || <span style={{ color: '#ff4d4f' }}>Není vyplněn!</span>}</Text>
+            </div>
+
+            <Title level={5}>Vyberte typ dotazníku:</Title>
+
+            <Space direction="vertical" style={{ width: '100%' }} size="middle">
+              <Button
+                size="large"
+                block
+                loading={sendingQuestionnaire}
+                onClick={() => handleSendQuestionnaire('pregnant')}
+                style={{
+                  height: 60,
+                  background: 'linear-gradient(135deg, #ec4899 0%, #be185d 100%)',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: 16,
+                  fontWeight: 500
+                }}
+              >
+                Dotazník pro těhotné
+              </Button>
+
+              <Button
+                size="large"
+                block
+                loading={sendingQuestionnaire}
+                onClick={() => handleSendQuestionnaire('gynecology')}
+                style={{
+                  height: 60,
+                  background: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: 16,
+                  fontWeight: 500
+                }}
+              >
+                Gynekologický dotazník
+              </Button>
+
+              <Button
+                size="large"
+                block
+                disabled
+                style={{
+                  height: 60,
+                  background: 'linear-gradient(135deg, #64748b 0%, #475569 100%)',
+                  border: 'none',
+                  color: 'white',
+                  fontSize: 16,
+                  fontWeight: 500,
+                  opacity: 0.6
+                }}
+              >
+                UZ vyšetření (připravuje se)
+              </Button>
+            </Space>
+
+            {!selectedPatient.email && (
+              <div style={{ marginTop: 16, padding: 12, background: '#fff7e6', border: '1px solid #ffd591', borderRadius: 6 }}>
+                <Text style={{ color: '#d46b08', fontSize: 12 }}>
+                  Pozor: Pacientka nemá vyplněný email. Po vygenerování odkazu ho můžete zkopírovat a poslat jí ručně.
+                </Text>
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      <Modal
+        title="✅ Dotazník byl vygenerován"
+        open={isSuccessModalVisible}
+        onOk={() => {
+          setIsSuccessModalVisible(false);
+          setSelectedPatient(null);
+          setGeneratedUrl('');
+        }}
+        onCancel={() => {
+          setIsSuccessModalVisible(false);
+          setSelectedPatient(null);
+          setGeneratedUrl('');
+        }}
+        width={600}
+      >
+        <div style={{ marginTop: '16px' }}>
+          <p style={{ marginBottom: '12px' }}>
+            <strong>Odkaz byl zkopírován do schránky:</strong>
+          </p>
+          <div style={{
+            background: '#f5f5f5',
+            padding: '12px',
+            borderRadius: '4px',
+            marginBottom: '16px',
+            wordBreak: 'break-all',
+            fontFamily: 'monospace',
+            fontSize: '12px'
+          }}>
+            {generatedUrl}
+          </div>
+          <div style={{ color: '#52c41a' }}>
+            ✓ Odkaz je platný 7 dní<br/>
+            ✓ Pošlete ho pacientce emailem nebo SMS
+          </div>
+        </div>
+      </Modal>
+    </div>
   );
 }
