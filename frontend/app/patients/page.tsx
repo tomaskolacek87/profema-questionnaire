@@ -495,6 +495,17 @@ export default function PatientsPage() {
                     marginTop: 16,
                   }}
                   className="dark-table"
+                  onRow={(record) => ({
+                    onClick: (e) => {
+                      // Ignore clicks on buttons
+                      const target = e.target as HTMLElement;
+                      if (target.closest('button') || target.closest('.ant-btn')) {
+                        return;
+                      }
+                      handleEditPatient(record);
+                    },
+                    style: { cursor: 'pointer' }
+                  })}
                 />
               ) : (
                 <Empty
