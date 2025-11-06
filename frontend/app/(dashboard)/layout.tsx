@@ -85,12 +85,6 @@ export default function DashboardLayout({
       </Layout>
 
       <style jsx global>{`
-        @media (min-width: 992px) {
-          .ant-layout {
-            margin-left: 0 !important;
-          }
-        }
-
         @media (max-width: 768px) {
           .dashboard-content {
             padding: 12px !important;
