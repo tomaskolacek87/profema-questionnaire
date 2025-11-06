@@ -90,14 +90,24 @@ export class PatientsService {
 
   /**
    * Load all patients from Astraia database
+   * Transform Astraia column names to frontend-friendly format
    */
-  async findAllFromAstraia(): Promise<AstraiaPatient[]> {
+  async findAllFromAstraia(): Promise<any[]> {
     this.logger.log('Loading patients from Astraia database...');
     const patients = await this.astraiaPatientRepo.find({
       order: { last_visit: 'DESC' }, // Astraia uses 'last_visit' not 'created_at'
     });
     this.logger.log(`Loaded ${patients.length} patients from Astraia`);
-    return patients;
+
+    // Transform Astraia column names to match frontend expectations
+    return patients.map(p => ({
+      ...p,
+      first_name: p.other_names || '',
+      last_name: p.name || '',
+      birth_date: p.dob,
+      birth_number: p.hospital_number || '',
+      created_at: p.first_contact || p.last_visit, // Fallback for sorting
+    }));
   }
 
   async findOne(id: string): Promise<Patient> {
