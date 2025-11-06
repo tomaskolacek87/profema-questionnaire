@@ -39,16 +39,6 @@ export default function AppSidebar({ collapsed, onCollapse }: AppSidebarProps) {
       {!collapsed && (
         <div
           onClick={() => onCollapse(true)}
-          style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            background: 'rgba(0,0,0,0.5)',
-            zIndex: 99,
-            display: 'none'
-          }}
           className="mobile-overlay"
         />
       )}
@@ -59,16 +49,12 @@ export default function AppSidebar({ collapsed, onCollapse }: AppSidebarProps) {
         collapsed={collapsed}
         onCollapse={onCollapse}
         breakpoint="lg"
+        className="app-sidebar"
         style={{
           background: 'linear-gradient(180deg, #2d1b4e 0%, #1a1a2e 100%)',
           boxShadow: '2px 0 8px rgba(0,0,0,0.3)',
           overflow: 'auto',
           height: '100vh',
-          position: 'fixed',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          zIndex: 100,
         }}
       >
         {/* Logo */}
@@ -136,9 +122,36 @@ export default function AppSidebar({ collapsed, onCollapse }: AppSidebarProps) {
       </Sider>
 
       <style jsx global>{`
-        @media (max-width: 992px) {
+        /* Desktop: static sidebar */
+        @media (min-width: 992px) {
+          .app-sidebar {
+            position: static !important;
+          }
+
+          .mobile-overlay {
+            display: none !important;
+          }
+        }
+
+        /* Mobile/Tablet: fixed sidebar */
+        @media (max-width: 991px) {
+          .app-sidebar {
+            position: fixed !important;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 100;
+          }
+
           .mobile-overlay {
             display: block !important;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
           }
         }
       `}</style>

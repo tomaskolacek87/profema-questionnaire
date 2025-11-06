@@ -76,7 +76,7 @@ export default function DashboardLayout({
     <Layout style={{ minHeight: '100vh' }}>
       <AppSidebar collapsed={collapsed} onCollapse={setCollapsed} />
 
-      <Layout style={{ background: '#1a1a2e', marginLeft: collapsed ? 0 : 250, transition: 'margin-left 0.2s' }}>
+      <Layout style={{ background: '#1a1a2e' }} className="main-layout">
         <AppHeader title={getPageTitle()} onMenuClick={() => setCollapsed(!collapsed)} />
 
         <Content style={{ padding: '16px' }} className="dashboard-content">
@@ -85,8 +85,16 @@ export default function DashboardLayout({
       </Layout>
 
       <style jsx global>{`
+        /* Desktop: sidebar is static, content has margin */
         @media (min-width: 992px) {
-          .ant-layout {
+          .main-layout {
+            margin-left: 250px !important;
+          }
+        }
+
+        /* Mobile/Tablet: sidebar is fixed/overlay, no margin */
+        @media (max-width: 991px) {
+          .main-layout {
             margin-left: 0 !important;
           }
         }
