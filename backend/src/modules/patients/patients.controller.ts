@@ -32,7 +32,13 @@ export class PatientsController {
     @Query('order') order?: 'ASC' | 'DESC',
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('source') source?: string,
   ) {
+    // If source=astraia, load from Astraia database
+    if (source === 'astraia') {
+      return this.patientsService.findAllFromAstraia();
+    }
+
     // If filters are provided, use advanced filtering
     if (status || assignedDoctorId || sort || page || limit) {
       return this.patientsService.findWithFilters({
@@ -45,7 +51,7 @@ export class PatientsController {
       });
     }
 
-    // Otherwise return all patients
+    // Otherwise return all patients from Profema
     return this.patientsService.findAll();
   }
 

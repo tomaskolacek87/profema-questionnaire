@@ -47,12 +47,12 @@ export default function PatientsPage() {
     router.push('/login');
   };
 
-  // Fetch patients from API
+  // Fetch patients from Astraia database
   const { data: patients, isLoading, refetch } = useQuery({
-    queryKey: ['patients'],
+    queryKey: ['patients-astraia'],
     queryFn: async () => {
       const response = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/patients`,
+        `${process.env.NEXT_PUBLIC_API_URL}/patients?source=astraia`,
         {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('auth_token')}`
@@ -122,15 +122,14 @@ export default function PatientsPage() {
       render: (city: string) => city ? <Text style={{ color: '#ffffff' }}>{city}</Text> : <Text style={{ color: 'rgba(255,255,255,0.3)' }}>-</Text>,
     },
     {
-      title: 'GDPR',
-      dataIndex: 'gdpr_consent',
-      key: 'gdpr',
-      render: (consent: boolean) =>
-        consent ? (
-          <Tag color="green" icon={<CheckCircleOutlined />}>Souhlas</Tag>
-        ) : (
-          <Tag color="default">Bez souhlasu</Tag>
-        ),
+      title: 'Datum narození',
+      dataIndex: 'birth_date',
+      key: 'birth_date',
+      render: (date: string) => date ? (
+        <Text style={{ color: '#ffffff' }}>
+          {format(new Date(date), 'dd.MM.yyyy', { locale: cs })}
+        </Text>
+      ) : <Text style={{ color: 'rgba(255,255,255,0.3)' }}>-</Text>,
     },
     {
       title: 'Vytvořeno',
@@ -370,31 +369,10 @@ export default function PatientsPage() {
                   <UserOutlined style={{ fontSize: 32, color: '#a855f7' }} />
                   <div>
                     <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, display: 'block' }}>
-                      Celkem pacientek
+                      Pacientek v databázi Astraia
                     </Text>
                     <Text style={{ color: '#ffffff', fontSize: 28, fontWeight: 700 }}>
                       {patients?.length || 0}
-                    </Text>
-                  </div>
-                </div>
-              </Card>
-
-              <Card
-                bordered={false}
-                style={{
-                  background: 'linear-gradient(135deg, #1e3a20 0%, #152818 100%)',
-                  border: '1px solid rgba(34, 197, 94, 0.2)',
-                  borderRadius: 12
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <CheckCircleOutlined style={{ fontSize: 32, color: '#22c55e' }} />
-                  <div>
-                    <Text style={{ color: 'rgba(255,255,255,0.7)', fontSize: 13, display: 'block' }}>
-                      Se souhlasem GDPR
-                    </Text>
-                    <Text style={{ color: '#ffffff', fontSize: 28, fontWeight: 700 }}>
-                      {patients?.filter((p: any) => p.gdpr_consent).length || 0}
                     </Text>
                   </div>
                 </div>

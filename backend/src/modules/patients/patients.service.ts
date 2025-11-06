@@ -93,6 +93,18 @@ export class PatientsService {
     });
   }
 
+  /**
+   * Load all patients from Astraia database
+   */
+  async findAllFromAstraia(): Promise<AstraiaPatient[]> {
+    this.logger.log('Loading patients from Astraia database...');
+    const patients = await this.astraiaPatientRepo.find({
+      order: { created_at: 'DESC' },
+    });
+    this.logger.log(`Loaded ${patients.length} patients from Astraia`);
+    return patients;
+  }
+
   async findOne(id: string): Promise<Patient> {
     return this.profemaPatientRepo.findOne({
       where: { id },

@@ -2,8 +2,9 @@ import { IsString, IsObject, IsOptional, IsDate } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateQuestionnaireDto {
+  @IsOptional()
   @IsString()
-  patient_id: string;
+  patient_id?: string;
 
   @IsOptional()
   @IsString()
