@@ -8,7 +8,7 @@ import { Patient } from '../../entities/profema/patient.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Appointment, Doctor, Patient], 'profema'),
+    TypeOrmModule.forFeature([Appointment, Doctor, Patient], 'profemaConnection'),
   ],
   controllers: [AppointmentsController],
   providers: [AppointmentsService],

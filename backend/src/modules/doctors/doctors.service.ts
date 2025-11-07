@@ -8,7 +8,7 @@ import { UpdateDoctorDto } from './dto/update-doctor.dto';
 @Injectable()
 export class DoctorsService {
   constructor(
-    @InjectRepository(Doctor, 'profema')
+    @InjectRepository(Doctor, 'profemaConnection')
     private doctorsRepository: Repository<Doctor>,
   ) {}
 
